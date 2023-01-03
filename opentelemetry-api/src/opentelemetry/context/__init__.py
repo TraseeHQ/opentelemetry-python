@@ -49,20 +49,12 @@ def _load_runtime_context(func: _F) -> _F:
             if _RUNTIME_CONTEXT is None:
                 # FIXME use a better implementation of a configuration manager to avoid having
                 # to get configuration values straight from environment variables
-                default_context = "contextvars_context"
-
-                configured_context = environ.get(
-                    OTEL_PYTHON_CONTEXT, default_context
-                )  # type: str
                 try:
-                    _RUNTIME_CONTEXT = next(
-                        iter_entry_points(
-                            "opentelemetry_context", configured_context
-                        )
-                    ).load()()
+                    from opentelemetry.context.contextvars_context import ContextVarsRuntimeContext
+                    _RUNTIME_CONTEXT = ContextVarsRuntimeContext()
                 except Exception:  # pylint: disable=broad-except
                     logger.error(
-                        "Failed to load context: %s", configured_context
+                        "Failed to load context"
                     )
         return func(*args, **kwargs)  # type: ignore[misc]
 
